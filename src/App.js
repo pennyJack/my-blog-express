@@ -5,12 +5,14 @@ import HomePage from './pages/HomePage';
 import AboutMe from './pages/AboutMe';
 import ArticlesList from './pages/ArticlesList';
 import ArticlePage from './pages/ArticlePage';
+import NavBar from './NavBar.js';
 
 
 function App() {
   return (
     <Router>
       <div className="App">
+        <NavBar />
         <div id="page-body">
           <Route path="/" exact>
             <HomePage />
