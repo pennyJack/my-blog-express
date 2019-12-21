@@ -23,7 +23,7 @@ function App() {
           <Route path="/articles-list">
             <ArticlesList />
           </Route>
-          <Route path="/article">
+          <Route path="/article/:name">
             <ArticlePage />
           </Route>
         </div>
