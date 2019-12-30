@@ -6,32 +6,34 @@ const app = express();
 
 app.use(bodyParser.json());
 
-// Get an article document from the database
-app.get('/api/articles/:name', async (req, res) => {
+// Helper function to connect api endpoint to the database
+const withDB = async (res, callback) => {
     try {
-        const articleName = req.params.name;
-
         const client = await MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true });
         const db = client.db('my-blog');
 
-        const articleInfo = await db.collection('articles').findOne({ name: articleName });
-
-        res.status(200).json(articleInfo);
+        await callback(db);
 
         client.close();
     } catch (error) {
         res.status(500).json({ message: 'Error connecting to db', error });
     }
+};
+
+// Get an article document from the database
+app.get('/api/articles/:name', (req, res) => {
+    withDB(res, async (db) => {
+        const articleName = req.params.name;
+        const articleInfo = await db.collection('articles').findOne({ name: articleName });
+
+        res.status(200).json(articleInfo);
+    });
 });
 
 // Upvoting blog articles
-app.post('/api/articles/:name/upvote', async (req, res) => {
-    try {
+app.post('/api/articles/:name/upvote', (req, res) => {
+    withDB(res, async (db) => {
         const articleName = req.params.name;
-
-        const client = await MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true });
-        const db = client.db('my-blog');
-
         const articleInfo = await db.collection('articles').findOne({ name: articleName });
 
         articleInfo.upvotes += 1;
@@ -43,25 +45,15 @@ app.post('/api/articles/:name/upvote', async (req, res) => {
                 $currentDate: { lastModified: true }
             }
         );
-
         res.status(200).json(articleInfo);
-
-        client.close();
-    } catch (error) {
-        res.status(500).json({ message: 'Error connecting to db', error });
-    }
+    });
 });
 
 // Adding comments
-app.post('/api/articles/:name/add-comment', async (req, res) => {
-    try {
-        const { username, text } = req.body;
+app.post('/api/articles/:name/add-comment', (req, res) => {
+    withDB(res, async (db) => {
         const articleName = req.params.name;
-
-        const client = await MongoClient.connect('mongodb://localhost:27017', { useNewUrlParser: true });
-        const db = client.db('my-blog');
-
-        let articleInfo = await db.collection('articles').findOne({ name: articleName });
+        const { username, text } = req.body;
 
         await db.collection('articles').updateOne(
             { name: articleName },
@@ -71,14 +63,10 @@ app.post('/api/articles/:name/add-comment', async (req, res) => {
             }
         );
 
-        articleInfo = await db.collection('articles').findOne({ name: articleName });
+        const updatedArticleInfo = await db.collection('articles').findOne({ name: articleName });
 
-        res.status(200).json(articleInfo);
-
-        client.close();
-    } catch (error) {
-        res.status(500).json({ message: 'Error connecting to db', error });
-    }
+        res.status(200).json(updatedArticleInfo);
+    });
 });
 
 app.listen(8000, () => console.log('Listening on port 8000'));
