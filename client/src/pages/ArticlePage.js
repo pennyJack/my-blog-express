@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import articleContent from './article-content';
 import { useParams } from 'react-router-dom';
 import ArticlesList from '../components/ArticlesList';
+import CommentsList from '../components/CommentsList';
 import NotFoundPage from './NotFoundPage';
 
 const ArticlePage = () => {
@@ -22,13 +23,14 @@ const ArticlePage = () => {
         })()
     }, [name]);
 
-    if (!article) return <NotFoundPage></NotFoundPage>;
+    if (!article) return <NotFoundPage />;
 
     return (
         <>
             <h1>{article.title}</h1>
             <p>This post has been upvoted: {articleInfo.upvotes} times</p>
             {article.content.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
+            <CommentsList comments={articleInfo.comments} />
             <h3>Other Articles:</h3>
             <ArticlesList articles={otherArticles} />
         </>
