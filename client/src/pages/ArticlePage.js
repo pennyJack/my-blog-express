@@ -4,6 +4,7 @@ import { useParams } from 'react-router-dom';
 import ArticlesList from '../components/ArticlesList';
 import CommentsList from '../components/CommentsList';
 import NotFoundPage from './NotFoundPage';
+import UpvotesSection from '../components/UpvotesSection';
 
 const ArticlePage = () => {
     const [articleInfo, setArticleInfo] = useState({
@@ -28,7 +29,11 @@ const ArticlePage = () => {
     return (
         <>
             <h1>{article.title}</h1>
-            <p>This post has been upvoted: {articleInfo.upvotes} times</p>
+            <UpvotesSection
+                articleName={name}
+                setArticleInfo={setArticleInfo}
+                upvotes={articleInfo.upvotes}
+            />
             {article.content.map((paragraph, index) => <p key={index}>{paragraph}</p>)}
             <CommentsList comments={articleInfo.comments} />
             <h3>Other Articles:</h3>
